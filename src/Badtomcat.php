@@ -14,6 +14,7 @@ use InvalidArgumentException;
 
 class Badtomcat
 {
+    protected $ext_path = '';
     /**
      * All of the finished, captured sections.
      *
@@ -54,11 +55,12 @@ class Badtomcat
     public function extend($path)
     {
         $path = $this->fixPath($path);
-        if (file_exists($path))
+        $this->ext_path = $path;
+        if (file_exists($this->ext_path))
         {
             extract($this->data);
             ob_start();
-            include $path;
+            include $this->ext_path;
             $this->response = ob_get_clean();
         }
     }
