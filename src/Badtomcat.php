@@ -81,7 +81,7 @@ class Badtomcat
         $this->inc_File = $this->fixPath($path, $isAbsPath);
         if (file_exists($this->inc_File)) {
             extract($this->data);
-            include $this->ext_path;
+            include $this->inc_File;
         }
 
     }
