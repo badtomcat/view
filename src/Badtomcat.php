@@ -16,6 +16,7 @@ class Badtomcat
 {
     protected $ext_path = '';
     protected $viewFile = '';
+    protected $inc_File = '';
     /**
      * All of the finished, captured sections.
      *
@@ -71,6 +72,19 @@ class Badtomcat
         }
     }
 
+    /**
+     * @param $path
+     * @param bool $isAbsPath
+     */
+    public function includeFile($path, $isAbsPath = false)
+    {
+        $this->inc_File = $this->fixPath($path, $isAbsPath);
+        if (file_exists($this->inc_File)) {
+            extract($this->data);
+            include $this->ext_path;
+        }
+
+    }
     protected function fixPath($path, $isAbsPath)
     {
         if ($isAbsPath) return $path;
