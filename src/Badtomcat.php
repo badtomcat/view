@@ -15,6 +15,7 @@ use InvalidArgumentException;
 class Badtomcat
 {
     protected $ext_path = '';
+    protected $viewFile = '';
     /**
      * All of the finished, captured sections.
      *
@@ -42,22 +43,27 @@ class Badtomcat
      */
     protected static $parentPlaceholder = [];
 
-    protected $viewFile;
+    protected $tpl_dir;
 
     protected $data = [];
 
     public $response = '';
-    public function __construct($path)
+
+    public function __construct($tpl_dir)
     {
-        $this->viewFile = $path;
+        $this->tpl_dir = $tpl_dir;
     }
 
-    public function extend($path)
+    /**
+     * PATH可以是index/index or index  or index.php
+     * @param $path
+     * @param bool $isAbsPath
+     */
+    public function extend($path, $isAbsPath = false)
     {
-        $path = $this->fixPath($path);
+        $path = $this->fixPath($path, $isAbsPath);
         $this->ext_path = $path;
-        if (file_exists($this->ext_path))
-        {
+        if (file_exists($this->ext_path)) {
             extract($this->data);
             ob_start();
             include $this->ext_path;
@@ -65,13 +71,11 @@ class Badtomcat
         }
     }
 
-    protected function fixPath($path)
+    protected function fixPath($path, $isAbsPath)
     {
-        if (strpos($path,"/") === false)
-        {
-            return dirname($this->viewFile)."/$path";
-        }
-        return $path;
+        if ($isAbsPath) return $path;
+
+        return $this->tpl_dir . (substr($this->tpl_dir, -1, 1) == '/' ? '' : '/') . $path . (substr($path,-4,4) == '.php' ? '' : '.php');
     }
 
     /**
@@ -150,12 +154,9 @@ class Badtomcat
     protected function extendSection($section, $content, $prepend = true)
     {
         if (isset($this->sections[$section])) {
-            if ($prepend)
-            {
+            if ($prepend) {
                 $content = $this->sections[$section] . $content;
-            }
-            else
-            {
+            } else {
                 $content = $content . $this->sections[$section];
             }
         }
@@ -237,12 +238,16 @@ class Badtomcat
     }
 
     /**
+     * PATH可以是index/index or index  or index.php
      * Get the evaluated contents of the object.
      *
+     * @param $path
+     * @param bool $isAbsPath
      * @return string
      */
-    public function render()
+    public function render($path,$isAbsPath = false)
     {
+        $this->viewFile = $this->fixPath($path,$isAbsPath);
         if (file_exists($this->viewFile)) {
             extract($this->data);
             ob_start();
@@ -252,11 +257,10 @@ class Badtomcat
             return "{$this->viewFile} is not exists";
         }
         $placeholders = [];
-        foreach ($this->yields as $key => $value)
-        {
+        foreach ($this->yields as $key => $value) {
             $placeholders[$value] = $this->sections[$key];
         }
-        return strtr($this->response,$placeholders) ;
+        return strtr($this->response, $placeholders);
     }
 
     /**
