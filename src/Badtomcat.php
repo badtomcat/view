@@ -70,6 +70,10 @@ class Badtomcat
             include $this->ext_path;
             $this->response = ob_get_clean();
         }
+        else
+        {
+            echo "<!-- {$this->ext_path} is nonexist -->";
+        }
     }
 
     /**
@@ -85,7 +89,13 @@ class Badtomcat
         }
 
     }
-    protected function fixPath($path, $isAbsPath)
+
+    /**
+     * @param $path
+     * @param $isAbsPath
+     * @return string
+     */
+    public function fixPath($path, $isAbsPath)
     {
         if ($isAbsPath) return $path;
 
